@@ -43,14 +43,14 @@ namespace HW_15
             }
         }
 
-        public Person Search(SearchDelegate value)
+        public Person Search(SearchDelegate searchDelegate, string Name, string Surname)
         {
-            foreach (Person person in pupils)
-            {
-                if (value(person))
-                    return person;
-            }
-            return null;
+            //foreach (Person person in pupils)
+            //{
+            //    if (value(person))
+            //        return person;
+            //}
+            return searchDelegate(pupils, Name, Surname);
         }
     }
 }

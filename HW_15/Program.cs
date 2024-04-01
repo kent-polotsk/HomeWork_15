@@ -6,7 +6,7 @@ public delegate void EnrollmentDelegate(Person person);
 
 public delegate void DirectorGreeting(Person person);
 
-public delegate bool SearchDelegate(Person person);
+public delegate Person SearchDelegate(List<Person> list, string Name, string Surname );
 
 
 public enum NamesM
@@ -85,6 +85,12 @@ internal class Program
 
         string name, surname;
 
+        SearchDelegate searchDelegate = (List<Person> list, string Name, string Surname) =>
+        {
+            return list.FirstOrDefault(p => p.Name.ToLower() == Name.ToLower() && p.Surname.ToLower() == Surname.ToLower()); 
+           
+        };
+
         Task task1 = new Task(Task1);
         task1.Start();
 
@@ -103,60 +109,64 @@ internal class Program
 
                 case ConsoleKey.D2:
                     {
-                        lock (obj)
+                        if (school.pupils != null && school.pupils.Count != 0)
                         {
-                            try
+                            lock (obj)
                             {
-                                name = string.Empty;
-                                surname = string.Empty;
+                                try
+                                {
+                                    name = string.Empty;
+                                    surname = string.Empty;
 
-                                Console.WriteLine("-----------------------------");
-                                Console.WriteLine("Введите имя искомого ученика:");
-                                name = Console.ReadLine();
-                                if (name == string.Empty)
-                                {
-                                    throw new ArgumentException();
-                                }
-                                else
-                                {
-                                    Console.WriteLine("Введите фамилию искомого ученика:");
-                                    surname = Console.ReadLine();
-                                    if (surname == string.Empty)
+                                    Console.WriteLine("-----------------------------");
+                                    Console.WriteLine("Введите имя искомого ученика:");
+                                    name = Console.ReadLine();
+                                    if (name == string.Empty)
                                     {
                                         throw new ArgumentException();
                                     }
                                     else
                                     {
-                                        lock (obj)
+                                        Console.WriteLine("Введите фамилию искомого ученика:");
+                                        surname = Console.ReadLine();
+                                        if (surname == string.Empty)
                                         {
-                                            Person foundPupil = school.Search(p =>
+                                            throw new ArgumentException();
+                                        }
+                                        else
+                                        {
+                                            lock (obj)
                                             {
-                                                if (p.Name.ToLower() == name.ToLower() && p.Surname.ToLower() == surname.ToLower())
-                                                    return true;
-                                                else return false;
-                                            });
-                                            if (foundPupil != null)
-                                            {
-                                                Console.ForegroundColor = ConsoleColor.DarkGreen;
-                                                Console.WriteLine($"{foundPupil.Name} {foundPupil.Surname} учится в школе.");
-                                                Console.ResetColor();
+                                                Person foundPupil = school.Search(searchDelegate, name, surname);
+
+                                                if (foundPupil != null)
+                                                {
+                                                    Console.ForegroundColor = ConsoleColor.DarkGreen;
+                                                    Console.WriteLine($"{foundPupil.Name} {foundPupil.Surname} учится в школе.");
+                                                    Console.ResetColor();
+                                                }
+                                                else
+                                                {
+                                                    
+                                                }
+                                                Console.WriteLine("-----------------------------");
+                                                Thread.Sleep(1500);
                                             }
-                                            else
-                                            {
-                                                Console.ForegroundColor = ConsoleColor.DarkRed;
-                                                Console.WriteLine($"Такой ученик не найден.");
-                                                Console.ResetColor();
-                                            }
-                                            Console.WriteLine("-----------------------------");
-                                            Thread.Sleep(1500);
                                         }
                                     }
                                 }
+                                catch (ArgumentException e)
+                                {
+                                    Console.WriteLine("Ошибка. Значения не получены. " + e.Message);
+                                }
+                                break;
                             }
-                            catch (ArgumentException e)
-                            {
-                                Console.WriteLine("Ошибка. Значения не получены. " + e.Message);
-                            }
+                        }
+                        else
+                        {
+                            Console.ForegroundColor = ConsoleColor.DarkRed;
+                            Console.WriteLine($"В школе нет учеников.");
+                            Console.ResetColor();
                             break;
                         }
                     }
